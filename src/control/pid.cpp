@@ -11,15 +11,16 @@ double PID::update(double measurement, double desired) {
     prevError_ = error;
 
     double u = p + i + d;
-    if (params_.enable_ramp_rate_limit) {
-        double delta_u = u - setU_;
-        double max_delta_u = params_.ramp_rate * params_.dt;
-        delta_u = std::clamp(delta_u, -max_delta_u, max_delta_u);
-        u = setU_ + delta_u;
+  // If ramp rate is disabled, or if we are within ramp rate, go to U.
+  if (!params_.enable_ramp_rate_limit ||
+      std::abs((setU_ - u)) < params_.ramp_rate * params_.dt) {
         setU_ = u;
-    }
+  } else {
+    // Ramp rate is enabled, and we can only increase by ramp rate.
+    setU_ += std::copysign(params_.ramp_rate * params_.dt, u - setU_);
+  }
 
-    return std::clamp(u, params_.kUMin, params_.kUMax);
+  return std::clamp(setU_, params_.kUMin, params_.kUMax);
 }
 
 PIDParams PID::defaultParams() {
