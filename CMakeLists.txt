@@ -18,8 +18,12 @@ find_package (Python3 COMPONENTS Interpreter Development)
 add_subdirectory(pybind11)
 
 set(CMAKE_CXX_STANDARD 17)
-set(UUV_LIBS_SRC 
-        src/model/uuv_dynamic_model.cpp)
+set(UUV_LIBS_SRC
+    src/model/uuv_dynamic_model.cpp
+    src/control/pid6dof.h
+    src/control/pid.cpp    
+)
+
 
 # Library compilation
 include_directories(src)
