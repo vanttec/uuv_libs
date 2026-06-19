@@ -1,8 +1,9 @@
 #ifndef UUV_ROS2_DYNAMIC_MODEL_H
 #define UUV_ROS2_DYNAMIC_MODEL_H
 
-#include <Eigen/Dense>
 #include "uuv_datatypes.h"
+#include <Eigen/Dense>
+#include <iostream>
 
 using namespace uuv;
 
@@ -10,6 +11,7 @@ class UUVDynamicModel {
 public:
   UUVDynamicModel();
   UUVDynamicModel(Eigen::VectorXf);
+  Eigen::VectorXf aggregate(std::array<double, 6> t);
   void update(std::array<double, 6> thrusters);
   void matricesUpdate();
   static double constrainAngle(double angle);
@@ -25,7 +27,9 @@ private:
 
   Eigen::MatrixXf J_;
   Eigen::Matrix3f R_;
-  Eigen::Matrix3f T_;
+
+  Eigen::Vector4f q_;          // orientation quaternion [w, x, y, z]
+  Eigen::Vector4f q_dot_prev_; // for trapezoidal integration
 
   /* System matrices */
 
@@ -64,10 +68,10 @@ private:
   /* Damping Parameters */
 
   double X_u_{-0.3431};
-  double Y_v_{0.0518};
+  double Y_v_{-0.0518};
   double Z_w_{-0.5841};
-  double K_p_{0.0064};
-  double M_q_{0.04};    
+  double K_p_{-0.0064};
+  double M_q_{-0.04};
   double N_r_{-0.1063};
 
   double X_uu_{-111.7397};
@@ -79,7 +83,7 @@ private:
 
   /* Distance from origin to center of mass */
   // They are the same
-  // TODO: CALCULAR Y AGREGAR 
+  // TODO: CALCULAR Y AGREGAR
 
   /* Distance from origin to center of buoyancy  */
   // TODO: CALCULAR Y MODIFICAR
@@ -97,5 +101,4 @@ private:
   double MAX_TORQUE_N_{100.};
 };
 
-
-#endif //UUV_ROS2_DYNAMIC_MODEL_H
+#endif // UUV_ROS2_DYNAMIC_MODEL_H
